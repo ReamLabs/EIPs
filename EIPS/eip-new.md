@@ -13,7 +13,7 @@ requires: 2335
 
 ## Abstract
 
-This ERC proposes an upgrade to the Ethereum keystore format defined in EIP-2335 to enhance resistance against quantum adversaries. It introduces stronger symmetric encryption, quantum-resistant key derivation functions.
+This EIP proposes an upgrade to the Ethereum keystore format defined in EIP-2335 to enhance resistance against quantum adversaries. It introduces stronger symmetric encryption, quantum-resistant key derivation functions.
 
 ## Motivation
 
