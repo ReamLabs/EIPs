@@ -2,7 +2,7 @@
 eip: <to be assigned>
 title: Quantum-Secure Ethereum Keystore Format
 description: Upgrade to the EIP-2335 keystore standard with quantum-resistant encryption, KDFs.
-author: Parthasarathy Ramanujam <@ch4r10t33r>, Jihoon Song <@jihoonsong>
+author: Parthasarathy Ramanujam <@ch4r10t33r>, Jihoon Song <@jihoonsong>, Gajinder Singh<@g11tech>
 discussions-to: https://ethereum-magicians.org/
 status: Draft
 type: Standards Track
@@ -57,46 +57,66 @@ The keystore format MUST conform to the following schema:
     "crypto": {
       "type": "object",
       "properties": {
-        "kdf": { "type": "string", "enum": ["argon2id"] },
-        "kdfparams": {
-          "type": "object",
-          "oneOf": [
-            {
-              "properties": {
-                "memory": { "type": "integer" },
-                "iterations": { "type": "integer" },
-                "parallelism": { "type": "integer" },
-                "salt": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
-              },
-              "required": ["memory", "iterations", "parallelism", "salt"]
-            },
-            {
-              "properties": {
-                "n": { "type": "integer" },
-                "r": { "type": "integer" },
-                "p": { "type": "integer" },
-                "salt": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
-              },
-              "required": ["n", "r", "p", "salt"]
+        "kdf": {
+          "type" : "object",
+          "properties": {
+            "function": { "type": "string", "enum": ["argon2id"] },
+            "params": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "properties": {
+                    "memory": { "type": "integer" },
+                    "iterations": { "type": "integer" },
+                    "parallelism": { "type": "integer" },
+                    "salt": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
+                  },
+                  "required": ["memory", "iterations", "parallelism", "salt"]
+                },
+                {
+                  "properties": {
+                    "m": { "type": "integer" },
+                    "t": { "type": "integer" },
+                    "p": { "type": "integer" },
+                    "salt": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
+                  },
+                  "required": ["m", "t", "p", "salt"]
+                }
+              ]
             }
-          ]
+          }
         },
-        "cipher": { "type": "string", "enum": ["aes-256-gcm", "xchacha20-poly1305"] },
-        "cipherparams": {
+        "cipher" {
           "type": "object",
           "properties": {
-            "nonce": { "type": "string", "pattern": "^[a-fA-F0-9]+$" },
-            "tag": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
-          },
-          "required": ["nonce", "tag"]
-        },
-        "ciphertext": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
+            "function": { "type": "string", "enum": ["aes-256-gcm"] },
+            "params": {
+              "type": "object",
+              "properties": {
+                "nonce": { "type": "string", "pattern": "^[a-fA-F0-9]+$" },
+                "tag": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
+              },
+              "required": ["nonce", "tag"]
+            },
+            "ciphertext": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
+          }
+        }
       },
-      "required": ["kdf", "kdfparams", "cipher", "cipherparams", "ciphertext"]
+      "required": ["kdf", "cipher", "ciphertext"]
     },
     "keytype": {
-      "type": "string",
-      "enum": ["xmss-poisedon2-ots"]
+      "type": "object",
+      "properties": {
+        "function": {"type": "string","enum": ["xmss-poisedon2-ots-seed"]},
+        "params": {
+          "type": "object",
+          "properties": {
+            "lifetime": "integer",
+            "activation_epoch": "integer",
+          },
+          "required": ["lifetime", "activation_epoch"]
+        }
+      }
     },
     "description": { "type": "string" },
     "quantum_secure": { "type": "boolean", "const": true },
@@ -106,8 +126,6 @@ The keystore format MUST conform to the following schema:
       "type": "object",
       "properties": {
         "created": { "type": "string", "format": "date-time" },
-        "version": { "type": "string" },
-        "network": { "type": "string" }
       }
     }
   },
@@ -121,27 +139,35 @@ The keystore format MUST conform to the following schema:
 {
   "version": 5,
   "uuid": "b86f38a7-7ea7-4a23-82d9-9c6d2c5ef3f7",
-  "keytype": "secp256k1",
   "quantum_secure": true,
   "crypto": {
-    "kdf": "argon2id",
-    "kdfparams": {
-      "memory": 65536,
-      "iterations": 4,
-      "parallelism": 2,
-      "salt": "a1b2c3..."
+    "kdf": {
+      "function" : "argon2id",
+      "params": {
+        "m": 65536,
+        "t": 4,
+        "p": 2,
+        "salt": "a1b2c3...",
+      },
     },
-    "cipher": "aes-256-gcm",
-    "cipherparams": {
-      "nonce": "3f2e4d...",
-      "tag": "9fc8ac..."
+    "cipher": {
+      "function": "aes-256-gcm",
+      "params": {
+        "nonce": "3f2e4d...",
+        "tag": "9fc8ac..."
+      },
+      "ciphertext": "4ba69e...",
     },
-    "ciphertext": "4ba69e..."
+  },
+  "keytype": {
+    "function": "xmss-poisedon2-ots-seed",
+    "params": {
+      "lifetime": 32,
+      "activation_epoch": 28999934,
+    },
   },
   "meta": {
     "created": "2025-06-17T21:00:00Z",
-    "version": "v1.0.0",
-    "network": "mainnet"
   }
 }
 ```
@@ -200,27 +226,35 @@ aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899
 {
   "version": 5,
   "uuid": "123e4567-e89b-12d3-a456-426614174000",
-  "keytype": "secp256k1",
   "quantum_secure": true,
   "crypto": {
-    "kdf": "argon2id",
-    "kdfparams": {
-      "memory": 65536,
-      "iterations": 4,
-      "parallelism": 2,
-      "salt": "0a1b2c3d4e5f60718293a4b5c6d7e8f9"
+    "kdf": {
+      "function": "argon2id",
+      "params": {
+        "m": 65536,
+        "t": 4,
+        "p": 2,
+        "salt": "0a1b2c3d4e5f60718293a4b5c6d7e8f9"
+      },
     },
-    "cipher": "aes-256-gcm",
-    "cipherparams": {
-      "nonce": "cafebabefacedbaddecaf888",
-      "tag": "feedfacedeadbeefcafe0000"
+    "cipher": {
+      "function": "aes-256-gcm",
+      "cipherparams": {
+        "nonce": "cafebabefacedbaddecaf888",
+        "tag": "feedfacedeadbeefcafe0000"
+      },
+      "ciphertext": "aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899",
     },
-    "ciphertext": "aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899"
+    "keytype": {
+      "function": "xmss-poisedon2-ots-seed",
+      "params": {
+        "lifetime": 32,
+        "activation_epoch": 28999934,
+      },
+    },
   },
   "meta": {
     "created": "2025-06-17T21:00:00Z",
-    "version": "v1.0.0",
-    "network": "mainnet"
   }
 }
 ```
@@ -236,11 +270,12 @@ aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899
 ## Implementation
 
 Implementation exists in the following languages
-- [Rust](https://github.com/ch4r10t33r/beam-keystore)
+- [Rust](https://github.com/ch4r10t33r/beam-keystore) (wip)
+- [Zig](https://github.com/blockblaz/pq-keystorez) (wip)
 
 ## Security Considerations
 
-- AES-256-GCM and XChaCha20-Poly1305 are widely audited and considered secure against quantum and classical attacks.
+- AES-256-GCM are widely audited and considered secure against quantum and classical attacks.
 - Argon2id protects against brute-force cracking of passphrases even under quantum-assisted brute-force attempts.
 
 ## Copyright
