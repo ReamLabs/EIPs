@@ -93,7 +93,7 @@ The keystore format MUST conform to the following schema:
             "params": {
               "type": "object",
               "properties": {
-                "nonce": { "type": "string", "pattern": "^[a-fA-F0-9]+$" },
+                "iv": { "type": "string", "pattern": "^[a-fA-F0-9]+$" },
                 "tag": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
               },
               "required": ["nonce", "tag"]
