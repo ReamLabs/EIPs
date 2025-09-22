@@ -98,7 +98,7 @@ The keystore format MUST conform to the following schema:
               },
               "required": ["nonce", "tag"]
             },
-            "ciphertext": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
+            "message": { "type": "string", "pattern": "^[a-fA-F0-9]+$" }
           }
         }
       },
